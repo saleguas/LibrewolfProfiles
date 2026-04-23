@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=LibreWolf Profiles
+Comment=Launch and manage LibreWolf profiles from one window
+Exec=io.github.saleguas.librewolfprofiles
+Icon=io.github.saleguas.librewolfprofiles
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;GTK;
+Keywords=LibreWolf;Profiles;Browser;
+StartupNotify=true

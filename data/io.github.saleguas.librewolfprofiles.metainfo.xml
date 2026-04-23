@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 saleguas -->
+<component type="desktop-application">
+  <id>io.github.saleguas.librewolfprofiles</id>
+  <name>LibreWolf Profiles</name>
+  <summary>Launch and manage LibreWolf profiles from one window</summary>
+  <developer id="io.github.saleguas">
+    <name>saleguas</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <!-- Replace this before submission once the project license is chosen. -->
+  <project_license>LicenseRef-proprietary</project_license>
+  <launchable type="desktop-id">io.github.saleguas.librewolfprofiles.desktop</launchable>
+
+  <description>
+    <p>LibreWolf Profiles provides one place to inspect, annotate, and launch LibreWolf browser profiles without editing LibreWolf's internal profile registry by hand.</p>
+    <p>LibreWolf Profiles reads the profiles registered by the LibreWolf Flatpak, lets you launch a selected profile, creates new profiles through LibreWolf itself, and opens LibreWolf's built-in profile manager.</p>
+    <p>Each profile can also have its own editable description stored separately in the app's own configuration directory, which keeps LibreWolf's profile files untouched while still allowing notes about what each profile is for.</p>
+  </description>
+
+  <categories>
+    <category>Network</category>
+    <category>WebBrowser</category>
+  </categories>
+
+  <keywords>
+    <keyword>LibreWolf</keyword>
+    <keyword>Profile</keyword>
+    <keyword>Browser</keyword>
+    <keyword>Launcher</keyword>
+  </keywords>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#315f72</color>
+    <color type="primary" scheme_preference="dark">#8ec5dd</color>
+  </branding>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/saleguas/LibrewolfProfiles/main/docs/image.png</image>
+      <caption>Review profiles, edit notes, and launch the selected profile</caption>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-04-21"/>
+  </releases>
+
+  <url type="homepage">https://github.com/saleguas/LibrewolfProfiles</url>
+  <url type="bugtracker">https://github.com/saleguas/LibrewolfProfiles/issues</url>
+  <url type="vcs-browser">https://github.com/saleguas/LibrewolfProfiles</url>
+
+  <requires>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <display_length compare="ge">768</display_length>
+  </requires>
+</component>
