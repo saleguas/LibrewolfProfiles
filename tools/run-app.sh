@@ -10,7 +10,7 @@ run_local() {
     exec python3 -m librewolf_profiles.main "$@"
 }
 
-if [[ -f /.flatpak-info ]] && command -v flatpak-spawn >/dev/null 2>&1 && [[ -z "${LIBREWOLF_PROFILES_NO_HOST_SPAWN:-}" ]]; then
+if command -v flatpak-spawn >/dev/null 2>&1 && [[ -z "${LIBREWOLF_PROFILES_NO_HOST_SPAWN:-}" ]] && flatpak-spawn --host true >/dev/null 2>&1; then
     exec flatpak-spawn --host bash -lc '
         set -euo pipefail
         cd "$1"

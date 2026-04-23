@@ -10,7 +10,10 @@ from .backend import BackendError, LibreWolfBackend, Profile
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
-from gi.repository import Adw, Gdk, Gio, Gtk, Pango  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango  # noqa: E402
+
+
+ACCENT_TEXT = '#3584e4'
 
 
 PROFILE_ROW_CSS = """
@@ -49,6 +52,18 @@ def install_css() -> None:
         provider,
         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
     )
+
+
+def escape_markup(text: object) -> str:
+    return GLib.markup_escape_text(str(text))
+
+
+def colored_value(text: object) -> str:
+    return f'<span foreground="{ACCENT_TEXT}" weight="600">{escape_markup(text)}</span>'
+
+
+def muted_key(text: object) -> str:
+    return f'<span alpha="65%">{escape_markup(text)}</span>'
 
 
 class ProfileRow(Gtk.ListBoxRow):
@@ -138,6 +153,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.set_default_size(490, 720)
 
         header_bar = Adw.HeaderBar()
+        header_bar.set_show_title(False)
 
         create_button = Gtk.Button(label='New Profile')
         create_button.add_css_class('suggested-action')
@@ -176,6 +192,12 @@ class MainWindow(Adw.ApplicationWindow):
         outer_box.append(scroller)
 
         action_bar = Gtk.ActionBar()
+        settings_button = Gtk.Button()
+        settings_button.set_icon_name('emblem-system-symbolic')
+        settings_button.set_tooltip_text('Settings')
+        settings_button.connect('clicked', self._show_settings_dialog)
+        action_bar.pack_start(settings_button)
+
         self.launch_button = Gtk.Button(label='Launch Profile')
         self.launch_button.add_css_class('suggested-action')
         self.launch_button.set_sensitive(False)
@@ -200,17 +222,19 @@ class MainWindow(Adw.ApplicationWindow):
             child = next_child
 
         try:
-            profiles = self.backend.load_profiles()
+            config, profiles = self.backend.load_profiles()
         except BackendError as exc:
-            self.status_label.set_text(f'Unable to load profiles from {self.backend.profiles_ini}: {exc}')
+            self.status_label.set_text(str(exc))
             self._update_actions()
             return
 
         default_names = [profile.name for profile in profiles if profile.is_default]
         default_summary = ', '.join(default_names) if default_names else 'none'
-        self.status_label.set_text(
-            f'Loaded {len(profiles)} profile(s) from {self.backend.profiles_ini}. '
-            f'Default profile: {default_summary}.'
+        self.status_label.set_markup(
+            f'{muted_key("Profiles:")} {colored_value(len(profiles))}   '
+            f'{muted_key("Default:")} {colored_value(default_summary)}\n'
+            f'{muted_key("Path:")} {colored_value(config.profiles_ini)}\n'
+            f'{muted_key("Command:")} {colored_value(config.launcher.summary)}'
         )
 
         for profile in profiles:
@@ -301,6 +325,110 @@ class MainWindow(Adw.ApplicationWindow):
         dialog.set_default_response(Gtk.ResponseType.OK)
         dialog.connect('response', self._on_create_response, entry)
         dialog.present()
+
+    def _show_settings_dialog(self, *_args: object) -> None:
+        dialog = Gtk.Dialog(title='Settings', transient_for=self, modal=True)
+        dialog.add_button('Cancel', Gtk.ResponseType.CANCEL)
+        dialog.add_button('Save', Gtk.ResponseType.OK)
+
+        save_button = dialog.get_widget_for_response(Gtk.ResponseType.OK)
+        if save_button is not None:
+            save_button.add_css_class('suggested-action')
+
+        settings = self.backend.load_settings()
+        try:
+            resolved = self.backend.resolve_configuration()
+            detected_command = resolved.launcher.summary
+            command_source = resolved.launcher.source
+            detected_profiles = str(resolved.profiles_ini)
+            profiles_source = resolved.profiles_source
+        except BackendError as exc:
+            detected_command = f'Unavailable: {exc}'
+            command_source = 'auto-detection failed'
+            detected_profiles = 'Unavailable until LibreWolf can be detected.'
+            profiles_source = 'auto-detection failed'
+
+        content_area = dialog.get_content_area()
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.set_margin_top(18)
+        box.set_margin_bottom(18)
+        box.set_margin_start(18)
+        box.set_margin_end(18)
+
+        heading = Gtk.Label(label='Leave blank to auto-detect.', xalign=0)
+        heading.set_wrap(True)
+        box.append(heading)
+
+        command_label = Gtk.Label(label='LibreWolf command override', xalign=0)
+        command_label.add_css_class('caption')
+        command_label.add_css_class('dim-label')
+        box.append(command_label)
+
+        command_entry = Gtk.Entry()
+        command_entry.set_hexpand(True)
+        command_entry.set_placeholder_text('Auto-detect, or e.g. flatpak run io.gitlab.librewolf-community')
+        command_entry.set_text(settings.librewolf_command)
+        box.append(command_entry)
+
+        command_status = Gtk.Label(xalign=0)
+        command_status.set_markup(
+            f'{muted_key("Current:")} {colored_value(detected_command)} '
+            f'{muted_key(f"({command_source})")}'
+        )
+        command_status.add_css_class('caption')
+        command_status.add_css_class('dim-label')
+        command_status.set_wrap(True)
+        box.append(command_status)
+
+        profiles_label = Gtk.Label(label='profiles.ini path override', xalign=0)
+        profiles_label.add_css_class('caption')
+        profiles_label.add_css_class('dim-label')
+        box.append(profiles_label)
+
+        profiles_entry = Gtk.Entry()
+        profiles_entry.set_hexpand(True)
+        profiles_entry.set_placeholder_text('Auto-detect, or the exact path to profiles.ini')
+        profiles_entry.set_text(settings.profiles_ini)
+        box.append(profiles_entry)
+
+        profiles_status = Gtk.Label(xalign=0)
+        profiles_status.set_markup(
+            f'{muted_key("Current:")} {colored_value(detected_profiles)} '
+            f'{muted_key(f"({profiles_source})")}'
+        )
+        profiles_status.add_css_class('caption')
+        profiles_status.add_css_class('dim-label')
+        profiles_status.set_wrap(True)
+        box.append(profiles_status)
+
+        content_area.append(box)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        dialog.connect('response', self._on_settings_response, command_entry, profiles_entry)
+        dialog.present()
+
+    def _on_settings_response(
+        self,
+        dialog: Gtk.Dialog,
+        response: int,
+        command_entry: Gtk.Entry,
+        profiles_entry: Gtk.Entry,
+    ) -> None:
+        if response != Gtk.ResponseType.OK:
+            dialog.destroy()
+            return
+
+        try:
+            self.backend.save_settings(
+                command_entry.get_text(),
+                profiles_entry.get_text(),
+            )
+        except BackendError as exc:
+            self._show_message('Unable to save settings', str(exc))
+            return
+
+        dialog.destroy()
+        self._refresh_profiles()
 
     def _on_create_response(self, dialog: Gtk.Dialog, response: int, entry: Gtk.Entry) -> None:
         if response != Gtk.ResponseType.OK:

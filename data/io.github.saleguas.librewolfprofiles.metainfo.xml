@@ -13,9 +13,9 @@
   <launchable type="desktop-id">io.github.saleguas.librewolfprofiles.desktop</launchable>
 
   <description>
-    <p>LibreWolf Profiles provides one place to inspect, annotate, and launch LibreWolf browser profiles without editing LibreWolf's internal profile registry by hand.</p>
-    <p>LibreWolf Profiles reads the profiles registered by the LibreWolf Flatpak, lets you launch a selected profile, creates new profiles through LibreWolf itself, and opens LibreWolf's built-in profile manager.</p>
-    <p>Each profile can also have its own editable description stored separately in the app's own configuration directory, which keeps LibreWolf's profile files untouched while still allowing notes about what each profile is for.</p>
+    <p>LibreWolf must already be installed. The app auto-detects the LibreWolf Flatpak and profile registry, with Settings available for custom commands or profile locations.</p>
+    <p>Use separate profiles for multiple Google accounts, workspaces, or browsing contexts while keeping LibreWolf's privacy-focused defaults.</p>
+    <p>Launch, create, annotate, and open the default profile manager without editing profiles.ini by hand.</p>
   </description>
 
   <categories>
