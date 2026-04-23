@@ -8,12 +8,11 @@
     <name>saleguas</name>
   </developer>
   <metadata_license>CC0-1.0</metadata_license>
-  <!-- Replace this before submission once the project license is chosen. -->
-  <project_license>LicenseRef-proprietary</project_license>
+  <project_license>MIT</project_license>
   <launchable type="desktop-id">io.github.saleguas.librewolfprofiles.desktop</launchable>
 
   <description>
-    <p>LibreWolf must already be installed. The app auto-detects the LibreWolf Flatpak and profile registry, with Settings available for custom commands or profile locations.</p>
+    <p>This independent companion app requires LibreWolf to be installed. It auto-detects the LibreWolf Flatpak and profile registry, with Settings available for custom commands or profile locations.</p>
     <p>Use separate profiles for multiple Google accounts, workspaces, or browsing contexts while keeping LibreWolf's privacy-focused defaults.</p>
     <p>Launch, create, annotate, and open the default profile manager without editing profiles.ini by hand.</p>
   </description>
